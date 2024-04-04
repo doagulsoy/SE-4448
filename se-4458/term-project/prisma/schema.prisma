@@ -1,0 +1,140 @@
+datasource db {
+provider = "postgresql"
+url = env("DATABASE_URL")
+}
+
+generator client {
+provider = "prisma-client-js"
+}
+
+model user {
+id Int @id @default(autoincrement())
+name String
+username String @unique
+email String @unique
+password String @unique
+description String?
+profile_photo String?
+reset_token String?
+followers_count Int @default(0)
+followings_count Int @default(0)
+post_count Int @default(0)
+
+posts post[]
+likedPosts post_likes[]
+savedPosts post_saved[]
+taggedPosts post_tagged[]
+followers follows[] @relation("following")
+followings follows[] @relation("follower")
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+post_replies post_replies[]
+reply_likes reply_likes[]
+story story[]
+story_likes story_likes[]
+}
+
+model post {
+id Int @id @default(autoincrement())
+file String?
+content String
+like_count Int @default(0)
+comments_count Int @default(0)
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+likes post_likes[]
+saves post_saved[]
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+post_tagged post_tagged[]
+post_replies post_replies[]
+}
+
+model story {
+id Int @id @default(autoincrement())
+file String?
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+likes story_likes[]
+like_count Int @default(0)
+is_saved Boolean @default(false)
+created_at DateTime @default(now())
+updated_ad DateTime @updatedAt
+}
+
+model story_likes {
+id Int @id @default(autoincrement())
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+story story? @relation(fields: [story_id], references: [id])
+story_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model post_likes {
+id Int @id @default(autoincrement())
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+post post? @relation(fields: [post_id], references: [id])
+post_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model post_saved {
+id Int @id @default(autoincrement())
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+post post? @relation(fields: [post_id], references: [id])
+post_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model post_tagged {
+id Int @id @default(autoincrement())
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+post post? @relation(fields: [post_id], references: [id])
+post_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model post_replies {
+id Int @id @default(autoincrement())
+content String
+like_count Int @default(0)
+comments_count Int @default(0)
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+post post? @relation(fields: [post_id], references: [id])
+post_id Int?
+original_reply_id Int?
+original_reply post_replies? @relation("replies", fields: [original_reply_id], references: [id])
+replies post_replies[] @relation("replies")
+reply_likes reply_likes[]
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model reply_likes {
+id Int @id @default(autoincrement())
+user user? @relation(fields: [user_id], references: [id])
+user_id Int
+reply post_replies? @relation(fields: [reply_id], references: [id])
+reply_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
+
+model follows {
+id Int @id @default(autoincrement())
+follower user @relation("follower", fields: [follower_id], references: [id])
+follower_id Int
+following user @relation("following", fields: [following_id], references: [id])
+following_id Int
+created_at DateTime @default(now())
+updated_at DateTime @updatedAt
+}
